@@ -20,6 +20,12 @@ const Home: React.FC = () => {
   const { t, lang, user } = useAppContext();
 
   useEffect(() => {
+    if (user?.role === 'admin' || user?.role === 'tech') {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
     if (window.location.hash === '#packages') {
       setTimeout(() => {
         offersRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -218,9 +224,12 @@ const Home: React.FC = () => {
               </ul>
 
               <div className="flex gap-3 pt-2">
-                {user?.role === 'admin' ? (
+                {user?.role === 'admin' || user?.role === 'tech' ? (
                   <button 
-                    onClick={() => alert(lang === 'AR' ? 'صلاحية مشاهد فقط: بصفتك المدير العام، يمكنك تتبع ومتابعة عمل الشركة واستعراض العقود والملفات الفنية والمالية فقط.' : lang === 'TR' ? 'Gözlemci Yetkisi: Genel Müdür olarak, yalnızca şirket projelerini izleme, faturaları görüntüleme ve her belgeyi kontrol etme yetkiniz vardır.' : 'Viewer Access Only: As General Manager, you can only track ongoing projects, view invoices and download digital agreements.')}
+                    onClick={() => alert(user?.role === 'admin'
+                      ? (lang === 'AR' ? 'صلاحية مشاهد فقط: بصفتك المدير العام، يمكنك تتبع ومتابعة عمل الشركة واستعراض العقود والملفات الفنية والمالية فقط.' : lang === 'TR' ? 'Gözlemci Yetkisi: Genel Müdür olarak, yalnızca şirket projelerini izleme, faturaları görüntüleme ve her belgeyi kontrol etme yetkiniz vardır.' : 'Viewer Access Only: As General Manager, you can only track ongoing projects, view invoices and download digital agreements.')
+                      : (lang === 'AR' ? 'صلاحية القسم المختص: بصفتك عضواً في الفريق التقني، يقتصر دورك على إدارة وتنفيذ المشاريع التابعة لقسمك فقط.' : lang === 'TR' ? 'Departman Yetkisi: Teknik ekip üyesi olarak, yalnızca kendi departmanınızdaki projeleri yönetme ve yürütme yetkiniz vardır.' : 'Department Access Only: As a technical team member, your access is limited to managing and executing projects belonging to your department.')
+                    )}
                     className="flex-1 bg-slate-100 dark:bg-slate-850 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-xs"
                   >
                     <Star className="w-4 h-4 text-amber-400 fill-current" />
