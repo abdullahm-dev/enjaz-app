@@ -7,8 +7,8 @@ import { useAppContext } from '../context';
 import { LOGO_URL, SITE_NAME } from '../constants';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('client@apptech.com');
-  const [password, setPassword] = useState('client');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
