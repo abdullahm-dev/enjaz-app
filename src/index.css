@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  
+  /* User provided colors */
+  /* Primary: Adjusted to be less blinding */
+  --color-indigo-50: #e0f7fa;
+  --color-indigo-100: #b2ebf2;
+  --color-indigo-200: #80deea;
+  --color-indigo-300: #4dd0e1;
+  --color-indigo-400: #26c6da;
+  --color-indigo-500: #00bcd4;
+  --color-indigo-600: #0097a7; /* Darker Cyan */
+  --color-indigo-700: #00838f;
+  --color-indigo-800: #006064;
+  --color-indigo-900: #004d40;
+  --color-indigo-950: #00251a;
+
+  /* Light Bg: Softer Off-White */
+  --color-slate-50: #f8fafc;
+
+  /* Dark Bg: Sharper Slate */
+  --color-slate-800: #334155;
+  --color-slate-900: #1e293b;
+  --color-slate-950: #0f172a;
+
+  /* Overrides for html2canvas compatibility (avoid oklch) */
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-300: #fca5a5;
+  --color-red-400: #f87171;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+}
+
+body {
+  direction: rtl;
+  font-family: var(--font-sans);
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-300;
+}
+
+.glass {
+  @apply bg-white/80 backdrop-blur-md border border-white/20;
+}
+
+.card-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}

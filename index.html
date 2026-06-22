@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>منصة إنجاز - ClientFlow</title>
+    <script>
+      // تعطيل القائمة المنسدلة عند النقر بزر الماوس الأيمن (Disable Right Click)
+      document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      // تعطيل اختصارات لوحة المفاتيح الخاصة بأدوات المطورين (Disable DevTools shortcuts)
+      document.addEventListener('keydown', (e) => {
+        // F12
+        if (e.key === 'F12') {
+          e.preventDefault();
+          return false;
+        }
+        // Ctrl + Shift + I (Inspect)
+        // Ctrl + Shift + J (Console)
+        // Ctrl + Shift + C (Element selector)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+          e.preventDefault();
+          return false;
+        }
+        // Ctrl + U (عرض مصدر الصفحة)
+        if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+          e.preventDefault();
+          return false;
+        }
+        // Ctrl + S (حفظ الصفحة)
+        if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
+          e.preventDefault();
+          return false;
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
