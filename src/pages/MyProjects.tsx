@@ -120,7 +120,17 @@ const MyProjects: React.FC = () => {
     setProjects(storedProjects);
   }, [lang]);
 
+  const packageCategories: { [key: number]: string } = {
+    1: 'design',
+    2: 'dev',
+    3: 'marketing'
+  };
+
   const filteredProjects = projects.filter(p => {
+    if (user?.role === 'tech') {
+      const category = packageCategories[p.package_id] || 'dev';
+      if (category !== user.department) return false;
+    }
     if (filter !== 'all' && p.status !== filter) return false;
     if (searchQuery) {
       const query = searchQuery.toLowerCase();

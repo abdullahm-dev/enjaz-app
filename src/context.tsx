@@ -8,7 +8,8 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'client' | 'admin';
+  role: 'client' | 'admin' | 'tech';
+  department?: 'design' | 'dev' | 'marketing';
   phone?: string;
 }
 
@@ -96,6 +97,15 @@ export const translations = {
     theme: 'المظهر',
     user_name: 'أحمد محمد',
     user_role: 'عميل',
+    role_client: 'عميل',
+    role_admin: 'المدير العام',
+    role_tech: 'الفريق التقني',
+    dept_design: 'تصميم',
+    dept_dev: 'برمجة',
+    dept_marketing: 'تسويق',
+    dept_design_title: 'القسم التقني - التصميم',
+    dept_dev_title: 'القسم التقني - البرمجة',
+    dept_marketing_title: 'القسم التقني - التسويق',
     light_mode: 'فاتح',
     dark_mode: 'داكن',
     order_completion: 'إتمام الطلب',
@@ -517,6 +527,15 @@ export const translations = {
     theme: 'Theme',
     user_name: 'Ahmed Mohammed',
     user_role: 'Client',
+    role_client: 'Client',
+    role_admin: 'General Manager',
+    role_tech: 'Technical Team',
+    dept_design: 'Design',
+    dept_dev: 'Development',
+    dept_marketing: 'Marketing',
+    dept_design_title: 'Technical Team - Design',
+    dept_dev_title: 'Technical Team - Dev',
+    dept_marketing_title: 'Technical Team - Marketing',
     light_mode: 'Light',
     dark_mode: 'Dark',
     order_completion: 'Order Completion',
@@ -941,6 +960,15 @@ export const translations = {
     theme: 'Tema',
     user_name: 'Ahmed Mohammed',
     user_role: 'Müşteri',
+    role_client: 'Müşteri',
+    role_admin: 'Genel Müdür',
+    role_tech: 'Teknik Ekip',
+    dept_design: 'Tasarım',
+    dept_dev: 'Geliştirme',
+    dept_marketing: 'Pazarlama',
+    dept_design_title: 'Teknik Ekip - Tasarım',
+    dept_dev_title: 'Teknik Ekip - Geliştirme',
+    dept_marketing_title: 'Teknik Ekip - Pazarlama',
     light_mode: 'Açık',
     dark_mode: 'Koyu',
     order_completion: 'Siparişi Tamamla',

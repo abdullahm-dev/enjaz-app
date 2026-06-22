@@ -19,7 +19,8 @@ db.exec(`
     phone TEXT,
     password TEXT,
     role TEXT DEFAULT 'client',
-    is_verified INTEGER DEFAULT 0
+    is_verified INTEGER DEFAULT 0,
+    department TEXT
   );
 
   CREATE TABLE IF NOT EXISTS packages (
@@ -87,6 +88,10 @@ db.exec(`
 const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number };
 const clientPasswordHash = bcrypt.hashSync("client", 10);
 const adminPasswordHash = bcrypt.hashSync("admin", 10);
+const designPasswordHash = bcrypt.hashSync("design", 10);
+const devPasswordHash = bcrypt.hashSync("dev", 10);
+const marketingPasswordHash = bcrypt.hashSync("marketing", 10);
+
 if (userCount.count === 0) {
   db.prepare(`
     INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified)
@@ -97,6 +102,21 @@ if (userCount.count === 0) {
     INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified)
     VALUES (?, ?, ?, ?, ?, 'admin', 1)
   `).run("Abdullah", "Muthanna", "admin@apptech.com", "+966500000000", adminPasswordHash);
+
+  db.prepare(`
+    INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified, department)
+    VALUES (?, ?, ?, ?, ?, 'tech', 1, 'design')
+  `).run("أحمد", "التصميم", "design_tech@apptech.com", "+966500000001", designPasswordHash);
+
+  db.prepare(`
+    INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified, department)
+    VALUES (?, ?, ?, ?, ?, 'tech', 1, 'dev')
+  `).run("محمد", "البرمجة", "dev_tech@apptech.com", "+966500000002", devPasswordHash);
+
+  db.prepare(`
+    INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified, department)
+    VALUES (?, ?, ?, ?, ?, 'tech', 1, 'marketing')
+  `).run("سارة", "التسويق", "marketing_tech@apptech.com", "+966500000003", marketingPasswordHash);
 } else {
   // Ensure existing seed accounts are updated to the requested name and password
   db.prepare(`
@@ -298,7 +318,8 @@ async function startServer() {
           lastName: user.last_name, 
           email: user.email,
           phone: user.phone,
-          role: user.role || 'client'
+          role: user.role || 'client',
+          department: user.department
         } 
       });
     } else {
@@ -354,7 +375,8 @@ async function startServer() {
         lastName: updatedUser.last_name,
         email: updatedUser.email,
         phone: updatedUser.phone,
-        role: updatedUser.role || 'client'
+        role: updatedUser.role || 'client',
+        department: updatedUser.department
       });
     } catch (err: any) {
       console.error("Settings update error:", err);

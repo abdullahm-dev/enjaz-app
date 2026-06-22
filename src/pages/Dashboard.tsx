@@ -144,6 +144,19 @@ const Dashboard: React.FC = () => {
       localStorage.setItem('projects', JSON.stringify(storedProjects));
     }
 
+    const packageCategories: { [key: number]: string } = {
+      1: 'design',
+      2: 'dev',
+      3: 'marketing'
+    };
+
+    if (user?.role === 'tech') {
+      storedProjects = storedProjects.filter((p: any) => {
+        const category = packageCategories[p.package_id] || 'dev';
+        return category === user.department;
+      });
+    }
+
     const projectIds = new Set(storedProjects.map((p: any) => p.id));
     const validPayments = storedPayments.filter((p: any) => projectIds.has(p.project_id));
 
@@ -209,7 +222,7 @@ const Dashboard: React.FC = () => {
     { label: t('total_projects'), value: stats.totalProjects, icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-500/10' },
     { label: t('current_projects'), value: stats.currentProjects, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/10' },
     { label: t('completed_projects'), value: stats.completedProjects, icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-500/10' },
-    { label: t('total_payments'), value: `${stats.totalPayments.toFixed(2)} ${t('sar')}`, icon: Wallet, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
+    ...(user?.role !== 'tech' ? [{ label: t('total_payments'), value: `${stats.totalPayments.toFixed(2)} ${t('sar')}`, icon: Wallet, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' }] : []),
   ];
 
   return (
@@ -241,7 +254,7 @@ const Dashboard: React.FC = () => {
       </header>
 
       {/* Stats Row - Now at the Top */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.role === 'tech' ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-4`}>
         {cards.map((card, idx) => (
           <div 
             key={idx}
@@ -297,9 +310,15 @@ const Dashboard: React.FC = () => {
                     <p className="text-slate-400 dark:text-slate-500 text-sm font-bold uppercase tracking-wider">{t('department')}</p>
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                        {lang === 'AR' ? 'ت.و' : lang === 'TR' ? 'WG' : 'WD'}
+                        {ongoingProject.package_id === 1 ? (lang === 'AR' ? 'تصميم' : 'DS') :
+                         ongoingProject.package_id === 3 ? (lang === 'AR' ? 'تسويق' : 'MK') :
+                         (lang === 'AR' ? 'برمجة' : 'DEV')}
                       </div>
-                      <p className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('web_dev')}</p>
+                      <p className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                        {ongoingProject.package_id === 1 ? t('design') :
+                         ongoingProject.package_id === 3 ? t('marketing') :
+                         t('development')}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -352,7 +371,7 @@ const Dashboard: React.FC = () => {
                   ? (lang === 'AR' ? 'لا توجد مشاريع جارية في حساب الشركة بحاجة لمتابعتها في الوقت الحالي.' : lang === 'TR' ? 'Şu anda sistemde izlenmesi gereken aktif bir proje bulunmamaktadır.' : 'There are currently no active company projects uploaded to track.')
                   : t('no_active_projects_desc')}
               </p>
-              {user?.role !== 'admin' && (
+              {user?.role === 'client' && (
                 <button 
                   onClick={() => navigate({ pathname: '/', hash: '#packages' })}
                   className="bg-indigo-600 dark:bg-indigo-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center justify-center gap-2"
@@ -364,7 +383,7 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Loyalty & Status OR Admin Permissions Panel */}
+        {/* Loyalty & Status OR Admin/Tech Permissions Panel */}
         <div className="space-y-6">
           {user?.role === 'admin' ? (
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col h-full text-start">
@@ -418,15 +437,73 @@ const Dashboard: React.FC = () => {
                   </div>
                   <span>{lang === 'AR' ? 'مراجعة كافة الفواتير والحسابات' : lang === 'TR' ? 'Finansal Fatura ve Hesap Kontrolü' : 'Invoices & financial accounts control'}</span>
                 </div>
-                <div className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-300">
+                <div className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-305">
                   <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <Check className="w-3.5 h-3.5" />
                   </div>
                   <span>{lang === 'AR' ? 'تحميل اتفاقيات ومستندات العمل' : lang === 'TR' ? 'Hizmet Sözleşmelerini İndirme' : 'Service level agreement downloads'}</span>
                 </div>
               </div>
+            </div>
+          ) : user?.role === 'tech' ? (
+            <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col h-full text-start">
+              <div className="flex justify-between items-start mb-8">
+                <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
+                  <Zap className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div className={isRTL ? "text-right" : "text-left"}>
+                  <p className="text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-widest mb-1">
+                    {lang === 'AR' ? 'صلاحيات الوصول' : lang === 'TR' ? 'ERİŞİM YETKİLERİ' : 'ACCESS LEVEL'}
+                  </p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">
+                    {lang === 'AR' ? 'تعديل وإدارة القسم' : lang === 'TR' ? 'YÖNETİM VE DÜZENLEME' : 'MANAGE & EDIT'}
+                  </p>
+                </div>
+              </div>
 
+              <div className="space-y-2 mb-6 text-start">
+                <p className="text-slate-400 dark:text-slate-500 text-sm font-bold uppercase tracking-wider">
+                  {lang === 'AR' ? 'القسم المسؤول' : lang === 'TR' ? 'Sorumlu Departman' : 'Assigned Department'}
+                </p>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                  {t(`dept_${user.department}_title`)}
+                </h3>
+              </div>
 
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed text-start">
+                {lang === 'AR' 
+                  ? `بصفتك عضواً في الفريق التقني لقسم ${t(`dept_${user.department}`)}، يمتد نطاق صلاحياتك لتشمل التعديل الكامل والتحكم الحصري في مشاريع قسمك فقط.` 
+                  : lang === 'TR' 
+                  ? `Teknik Ekip ${t(`dept_${user.department}`)} departmanı üyesi olarak, yetki alanınız sadece kendi departmanınızdaki projeleri tam olarak düzenlemeyi ve yönetmeyi kapsar.` 
+                  : `As a member of the ${t(`dept_${user.department}`)} Technical Team, your access is granted to manage, edit, and update projects belonging to your department exclusively.`}
+              </p>
+
+              <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 flex-1 text-start">
+                <div className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                  <span>{lang === 'AR' ? 'تعديل مراحل المشروع ونسبة الإنجاز' : lang === 'TR' ? 'Proje Aşamalarını ve İlerlemeyi Düzenleme' : 'Edit project stages & progress'}</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                  <span>{lang === 'AR' ? 'إرسال واستقبال ملفات الأكواد والتصاميم' : lang === 'TR' ? 'Kod ve Tasarım Dosyası Gönderme' : 'Upload source code & design files'}</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-305">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                  <span>{lang === 'AR' ? 'التواصل المباشر مع العملاء بالدردشة الفنية' : lang === 'TR' ? 'Müşteri ile Doğrudan Teknik Sohbet' : 'Direct technical chat with client'}</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                  <span>{lang === 'AR' ? 'تقديم مقترحات وتحديثات مراحل الإنجاز' : lang === 'TR' ? 'Gelişmeler ve Öneriler Sunma' : 'Provide suggestions & stage updates'}</span>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col h-full">
@@ -474,7 +551,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Support Banner */}
-      {user?.role !== 'admin' && (
+      {user?.role === 'client' && (
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-[2.5rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden shadow-lg">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="relative z-10 flex items-center gap-6">

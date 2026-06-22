@@ -466,21 +466,66 @@ const ProjectDetail: React.FC = () => {
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
+    const isTechSender = user?.role === 'tech';
     const msg: ChatMessage = {
       id: Date.now().toString(),
-      sender: 'client',
+      sender: isTechSender ? 'technical' : 'client',
       text: newMessage,
       timestamp: new Date().toISOString(),
       seen: false
     };
-    setProject(prev => prev ? {
-      ...prev,
-      chat: { ...prev.chat, messages: [...prev.chat.messages, msg] }
-    } : null);
+    setProject(prev => {
+      if (!prev) return null;
+      const updatedChat = { ...prev.chat, messages: [...prev.chat.messages, msg] };
+      const updated = { ...prev, chat: updatedChat };
+      const stored = JSON.parse(localStorage.getItem('projects') || '[]');
+      const updatedStored = stored.map((p: any) => p.id === updated.id ? { ...p, chat: updatedChat } : p);
+      localStorage.setItem('projects', JSON.stringify(updatedStored));
+      return updated;
+    });
     setNewMessage('');
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isTechSender = user?.role === 'tech';
+
+    const newFile: ProjectFile = {
+      id: Date.now().toString(),
+      name: file.name,
+      url: '#',
+      type: file.type.startsWith('image/') ? 'image' : 'document',
+      uploadedBy: isTechSender ? 'technical' : 'client',
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    const fileLabel = isTechSender 
+      ? (lang === 'AR' ? 'أرسل ملفاً تقنياً' : lang === 'TR' ? 'teknik dosya gönderdi' : 'sent a technical file')
+      : (lang === 'AR' ? 'أرسل ملفاً' : lang === 'TR' ? 'dosya gönderdi' : 'sent a file');
+
+    const msg: ChatMessage = {
+      id: Date.now().toString(),
+      sender: isTechSender ? 'technical' : 'client',
+      text: `${fileLabel}: ${file.name}`,
+      files: [newFile],
+      timestamp: new Date().toISOString(),
+      seen: false
+    };
+
+    setProject(prev => {
+      if (!prev) return null;
+      const updatedChat = { ...prev.chat, messages: [...prev.chat.messages, msg] };
+      const updated = { ...prev, chat: updatedChat };
+      const stored = JSON.parse(localStorage.getItem('projects') || '[]');
+      const updatedStored = stored.map((p: any) => p.id === updated.id ? { ...p, chat: updatedChat } : p);
+      localStorage.setItem('projects', JSON.stringify(updatedStored));
+      return updated;
+    });
+  };
+
+  const handleTechFileUpload = (e: React.ChangeEvent<HTMLInputElement>, fileCategory: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -489,23 +534,24 @@ const ProjectDetail: React.FC = () => {
       name: file.name,
       url: '#',
       type: file.type.startsWith('image/') ? 'image' : 'document',
-      uploadedBy: 'client',
+      uploadedBy: 'technical',
       date: new Date().toISOString().split('T')[0]
     };
 
-    const msg: ChatMessage = {
-      id: Date.now().toString(),
-      sender: 'client',
-      text: `أرسل ملفاً: ${file.name}`,
-      files: [newFile],
-      timestamp: new Date().toISOString(),
-      seen: false
-    };
+    setProject(prev => {
+      if (!prev) return null;
+      const updatedFiles = {
+        ...prev.files,
+        [fileCategory]: [...(prev.files as any)[fileCategory], newFile]
+      };
+      const updated = { ...prev, files: updatedFiles };
+      const stored = JSON.parse(localStorage.getItem('projects') || '[]');
+      const updatedStored = stored.map((p: any) => p.id === updated.id ? { ...p, files: updatedFiles } : p);
+      localStorage.setItem('projects', JSON.stringify(updatedStored));
+      return updated;
+    });
 
-    setProject(prev => prev ? {
-      ...prev,
-      chat: { ...prev.chat, messages: [...prev.chat.messages, msg] }
-    } : null);
+    toast.success(lang === 'AR' ? 'تم رفع الملف بنجاح' : 'File uploaded successfully');
   };
 
   const handleApproveStage = (stageId: string) => {
@@ -610,7 +656,7 @@ const ProjectDetail: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('start_date')}: {format(new Date(project.start_date || new Date()), 'MMMM yyyy', { locale: dateLocale })}</p>
         </div>
         
-        {isTechnicalView && user?.role !== 'admin' && project.status === 'in_review' && (
+        {user?.role === 'tech' && user?.department === category && project.status === 'in_review' && (
           <button 
             onClick={handleStartExecution}
             className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20"
@@ -692,7 +738,7 @@ const ProjectDetail: React.FC = () => {
                 <div className="pt-6 border-t border-slate-50 dark:border-slate-800/50">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-slate-900 dark:text-white">{t('progress_percentage')}</h3>
-                    {user?.role === 'admin' ? (
+                    {user?.role === 'tech' && user?.department === category ? (
                       <div className="flex items-center gap-2">
                         <input 
                           type="range" 
@@ -780,7 +826,7 @@ const ProjectDetail: React.FC = () => {
                         <p className="text-xs text-slate-500">{t(`stage_${stage.status}`)}</p>
                       </div>
                     </div>
-                    {user?.role === 'admin' ? (
+                    {user?.role === 'tech' && user?.department === category ? (
                       <div className="flex flex-col gap-2 items-end border border-slate-100 dark:border-slate-800/80 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/30">
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{lang === 'AR' ? 'حالة المرحلة:' : 'Stage Status:'}</span>
@@ -923,10 +969,23 @@ const ProjectDetail: React.FC = () => {
                     { key: 'others', label: t('other_files'), icon: FileText },
                   ].map((cat) => (
                     <div key={cat.key} className="space-y-4">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                        <cat.icon className="w-3 h-3" />
-                        {cat.label}
-                      </h4>
+                      <div className="flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/10 p-2 rounded-xl mb-2">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                          <cat.icon className="w-3 h-3" />
+                          {cat.label}
+                        </h4>
+                        {user?.role === 'tech' && user?.department === category && (
+                          <label className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-750 dark:hover:text-indigo-300 cursor-pointer transition-colors bg-indigo-50 dark:bg-indigo-500/10 px-2 py-1 rounded-lg">
+                            <Upload className="w-3 h-3" />
+                            <span>{lang === 'AR' ? 'رفع ملف' : lang === 'TR' ? 'Yükle' : 'Upload'}</span>
+                            <input 
+                              type="file" 
+                              className="hidden" 
+                              onChange={(e) => handleTechFileUpload(e, cat.key)} 
+                            />
+                          </label>
+                        )}
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {(project.files as any)[cat.key].map((file: ProjectFile) => (
                           <div key={file.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700 group hover:border-indigo-200 transition-all">
@@ -1056,15 +1115,22 @@ const ProjectDetail: React.FC = () => {
 
               {/* Input Area */}
               <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-                {user?.role === 'admin' ? (
+                {user?.role === 'admin' || (user?.role === 'tech' && user?.department !== category) ? (
                   <div className="flex items-center justify-center gap-2 py-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 border-dashed text-slate-500 dark:text-slate-400 text-sm font-medium">
                     <AlertCircle className="w-5 h-5 text-amber-500" />
                     <span>
-                      {lang === 'AR' 
-                        ? 'وضع المشاهدة الآمنة: لا توجد صلاحيات لإرسال رسائل أو تعديل المحادثة الفنية.' 
-                        : lang === 'TR' 
-                        ? 'Güvenli Gözlem Modu: Teknik sohbete mesaj gönderme yetkiniz bulunmamaktadır.' 
-                        : 'Secure Viewer Mode: You do not have permission to send messages or modify the technical chat.'}
+                      {user?.role === 'admin' 
+                        ? (lang === 'AR' 
+                          ? 'وضع المشاهدة الآمنة: لا توجد صلاحيات لإرسال رسائل أو تعديل المحادثة الفنية.' 
+                          : lang === 'TR' 
+                          ? 'Güvenli Gözlem Modu: Teknik sohbete mesaj gönderme yetkiniz bulunmamaktadır.' 
+                          : 'Secure Viewer Mode: You do not have permission to send messages or modify the technical chat.')
+                        : (lang === 'AR'
+                          ? 'تنبيه: لا تملك صلاحية إرسال رسائل في المحادثة الفنية لمشروع لا يتبع لقسمك.'
+                          : lang === 'TR'
+                          ? 'Uyarı: Departmanınıza ait olmayan bir projede teknik sohbete mesaj gönderme yetkiniz yoktur.'
+                          : 'Warning: You do not have permission to send messages in a technical chat for a project not belonging to your department.')
+                      }
                     </span>
                   </div>
                 ) : (

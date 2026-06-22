@@ -47,8 +47,16 @@ const Sidebar: React.FC = () => {
   const menuItems = [
     { icon: Home, label: t('home'), path: '/' },
     { icon: LayoutDashboard, label: t('dashboard'), path: '/dashboard' },
-    { icon: Briefcase, label: user?.role === 'admin' ? (lang === 'AR' ? 'المشاريع القائمة' : lang === 'TR' ? 'Mevcut Projeler' : 'Existing Projects') : t('projects'), path: '/projects' },
-    { icon: ReceiptText, label: t('invoices'), path: '/invoices' },
+    { 
+      icon: Briefcase, 
+      label: user?.role === 'admin' 
+        ? (lang === 'AR' ? 'المشاريع القائمة' : lang === 'TR' ? 'Mevcut Projeler' : 'Existing Projects') 
+        : user?.role === 'tech'
+          ? (lang === 'AR' ? 'مشاريع القسم' : lang === 'TR' ? 'Departman Projeleri' : 'Department Projects')
+          : t('projects'), 
+      path: '/projects' 
+    },
+    ...(user?.role !== 'tech' ? [{ icon: ReceiptText, label: t('invoices'), path: '/invoices' }] : []),
     { icon: HelpCircle, label: t('faq'), path: '/faq' },
   ];
 
@@ -146,7 +154,11 @@ const Sidebar: React.FC = () => {
                   {user ? `${user.firstName} ${user.lastName}` : t('user_name')}
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                  {user?.role === 'admin' ? (lang === 'AR' ? 'المدير العام' : lang === 'TR' ? 'Genel Müdür' : 'General Manager') : t('user_role')}
+                  {user?.role === 'admin' 
+                    ? (lang === 'AR' ? 'المدير العام' : lang === 'TR' ? 'Genel Müdür' : 'General Manager') 
+                    : user?.role === 'tech'
+                      ? t(`dept_${user.department}_title`)
+                      : t('user_role')}
                 </span>
               </motion.div>
             </div>
