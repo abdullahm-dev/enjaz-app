@@ -20,12 +20,21 @@ import { useAppContext } from '../context';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
+import { useNavigate } from 'react-router-dom';
+
 const Invoices: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [activeTab, setActiveTab] = useState('invoices');
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const { t, lang, user } = useAppContext();
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?.role === 'tech') {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const dateLocale = lang === 'AR' ? ar : lang === 'TR' ? tr : enUS;
 

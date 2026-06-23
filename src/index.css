@@ -8,17 +8,17 @@
   
   /* User provided colors */
   /* Primary: Adjusted to be less blinding */
-  --color-indigo-50: #e0f7fa;
-  --color-indigo-100: #b2ebf2;
-  --color-indigo-200: #80deea;
-  --color-indigo-300: #4dd0e1;
-  --color-indigo-400: #26c6da;
-  --color-indigo-500: #00bcd4;
-  --color-indigo-600: #0097a7; /* Darker Cyan */
-  --color-indigo-700: #00838f;
-  --color-indigo-800: #006064;
-  --color-indigo-900: #004d40;
-  --color-indigo-950: #00251a;
+  --color-indigo-50: #eef2ff;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2fe;
+  --color-indigo-300: #a5b4fc;
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-indigo-700: #4338ca;
+  --color-indigo-800: #3730a3;
+  --color-indigo-900: #312e81;
+  --color-indigo-950: #1e1b4b;
 
   /* Light Bg: Softer Off-White */
   --color-slate-50: #f8fafc;

@@ -106,17 +106,17 @@ if (userCount.count === 0) {
   db.prepare(`
     INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified, department)
     VALUES (?, ?, ?, ?, ?, 'tech', 1, 'design')
-  `).run("أحمد", "التصميم", "design_tech@apptech.com", "+966500000001", designPasswordHash);
+  `).run("فريق", "التصميم", "design@apptech.com", "+966500000001", designPasswordHash);
 
   db.prepare(`
     INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified, department)
     VALUES (?, ?, ?, ?, ?, 'tech', 1, 'dev')
-  `).run("محمد", "البرمجة", "dev_tech@apptech.com", "+966500000002", devPasswordHash);
+  `).run("فريق", "البرمجة", "dev@apptech.com", "+966500000002", devPasswordHash);
 
   db.prepare(`
     INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified, department)
     VALUES (?, ?, ?, ?, ?, 'tech', 1, 'marketing')
-  `).run("سارة", "التسويق", "marketing_tech@apptech.com", "+966500000003", marketingPasswordHash);
+  `).run("فريق", "التسويق", "marketing@apptech.com", "+966500000003", marketingPasswordHash);
 } else {
   // Ensure existing seed accounts are updated to the requested name and password
   db.prepare(`
@@ -126,6 +126,25 @@ if (userCount.count === 0) {
   db.prepare(`
     UPDATE users SET first_name = ?, last_name = ?, password = ? WHERE email = ?
   `).run("Abdullah", "Muthanna", adminPasswordHash, "admin@apptech.com");
+
+  // Delete old tech accounts if they exist to avoid confusion
+  db.prepare("DELETE FROM users WHERE email IN ('design_tech@apptech.com', 'dev_tech@apptech.com', 'marketing_tech@apptech.com')").run();
+
+  // Make sure new tech accounts exist or are updated
+  const insertOrReplaceTech = (firstName: string, lastName: string, email: string, phone: string, hash: string, dept: string) => {
+    const existing = db.prepare("SELECT id FROM users WHERE email = ?").get(email) as { id: number } | undefined;
+    if (existing) {
+      db.prepare("UPDATE users SET first_name = ?, last_name = ?, password = ?, role = 'tech', department = ? WHERE email = ?")
+        .run(firstName, lastName, hash, dept, email);
+    } else {
+      db.prepare("INSERT INTO users (first_name, last_name, email, phone, password, role, is_verified, department) VALUES (?, ?, ?, ?, ?, 'tech', 1, ?)")
+        .run(firstName, lastName, email, phone, hash, dept);
+    }
+  };
+
+  insertOrReplaceTech("فريق", "التصميم", "design@apptech.com", "+966500000001", designPasswordHash, "design");
+  insertOrReplaceTech("فريق", "البرمجة", "dev@apptech.com", "+966500000002", devPasswordHash, "dev");
+  insertOrReplaceTech("فريق", "التسويق", "marketing@apptech.com", "+966500000003", marketingPasswordHash, "marketing");
 }
 
 // Seed initial data if empty
